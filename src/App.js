@@ -1,23 +1,72 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useState } from "react";
+import Modal from "./components/Modal";
+import mockData from "./data";
+import Scheduler from "./components/Scheduler";
 
 function App() {
+  const [data, setData] = useState(mockData);
+  const [show, setShow] = useState(false);
+  const [eventType, setEventType] = useState("create");
+  const [currentEvent, setCurrentEvent] = useState({});
+  const [currentSysId, setCurrentSysId] = useState(null);
+
+  const setCurrentSingleDataId = (value) => {
+    setCurrentSysId(value);
+  };
+  const addNewEvent = (newEvent, id) => {
+    // TODO: change the name to be less vague
+    const tempData = [...data];
+    const selectedSingleData = tempData.find(
+      (singleData) => (singleData.sys.id = id)
+    );
+    const selectedIndex = tempData.findIndex(
+      (singleData) => (singleData.sys.id = id)
+    );
+
+    // Add new event to selectedSingleData
+    const updatedSingleData = {
+      ...selectedSingleData,
+      data: {
+        ...selectedSingleData.data,
+        events: [...selectedSingleData.data.events, newEvent],
+      },
+    };
+
+    // Update the selectedSingleData and data
+    tempData[selectedIndex] = updatedSingleData;
+    setData(tempData);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <p>***NOTE: Double click label to view detail of event</p>
+      <h1>
+        <span>Schedule</span>
+      </h1>
+      <Modal
+        title="Event"
+        onClose={() => setShow(false)}
+        show={show}
+        eventType={eventType}
+        currentEvent={eventType === "view" ? currentEvent : null}
+        addNewEvent={addNewEvent}
+        sysId={currentSysId}
+      />
+      <>
+        {data.map((singleData) => {
+          return (
+            <Scheduler
+              setShow={setShow}
+              setEventType={setEventType}
+              event={singleData}
+              key={singleData.sys.id}
+              setCurrentEvent={setCurrentEvent}
+              setCurrentSingleDataId={setCurrentSingleDataId}
+            />
+          );
+        })}
+      </>
     </div>
   );
 }
